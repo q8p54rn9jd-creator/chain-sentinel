@@ -36,7 +36,8 @@ def main():
     # --- Step 2: Fetch raw transactions ---
     raw_transactions = fetch_transactions(wallet_address)
 
-    if not raw_transactions:
+    # fetch_transactions returns a DataFrame — check with .empty
+    if raw_transactions is None or raw_transactions.empty:
         print("[ERROR] No transactions found, or the API request failed.")
         print("        Check your ETHERSCAN_API_KEY and internet connection.")
         return
