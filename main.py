@@ -1,8 +1,9 @@
 # main.py
 
 from fetch_transcation import fetch_transactions
+from clean_data import clean_transactions
 from Risk_score import compute_risk_score
-from build_graph import draw_graph
+from build_graph import draw_graph, build_graph
 
 
 def shorten_address(address):
@@ -25,6 +26,7 @@ def main():
     print(f"\n[1/3] Fetching transactions for {shorten_address(wallet_address)} ...")
 
     # --- Step 2: Run all fraud checks ---
+    print("\n[2/3] Running fraud detection checks ...")
     risk, flags = compute_risk_score(wallet_address)
 
     # --- Step 3: Clean one-line output ---
@@ -35,10 +37,13 @@ def main():
     print("=" * 55)
 
     # --- Step 4: Generate graph ---
-    print("\nGenerating transaction graph...")
-    draw_graph(wallet_address)
-    print("Graph saved as graph.png")
+    print("\n[3/3] Generating transaction graph ...")
+    df = fetch_transactions(wallet_address)
+    df = clean_transactions(df)
+    G = build_graph(df)
+    draw_graph(G, wallet_address)
     print("Analysis complete.")
+
 
 if __name__ == "__main__":
     main()
