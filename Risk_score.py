@@ -26,7 +26,7 @@ def check_blacklist_connection(wallet_address, transactions):
     return False, "No blacklist connection found"
 
 
-def compute_risk_score(wallet_address: str) -> None:
+def compute_risk_score(wallet_address: str) -> tuple:
     """
     Runs all 3 fraud detection checks and combines them into a risk score.
 
@@ -35,6 +35,9 @@ def compute_risk_score(wallet_address: str) -> None:
         1 flag  → LOW RISK
         2 flags → MEDIUM RISK
         3 flags → HIGH RISK
+
+    Returns:
+        (risk_label: str, flags_list: list)
     """
 
     print("=" * 60)
@@ -47,14 +50,16 @@ def compute_risk_score(wallet_address: str) -> None:
     raw_df   = fetch_transactions(wallet_address)
     clean_df = clean_transactions(raw_df)
 
-    flags   = 0
-    results = []
+    flags       = 0
+    flags_list  = []   # ← NEW: track flag names for clean output
+    results     = []
 
     # ── CHECK 1: Blacklist (Tan) ─────────────────────────────────────────────
     bl_flagged, bl_reason = check_blacklist_connection(wallet_address, clean_df)
     status = "⚠  FLAGGED" if bl_flagged else "✔  CLEAR"
     if bl_flagged:
         flags += 1
+        flags_list.append("blacklist contact")   # ← NEW
     results.append(("Blacklist Check     (Tan)", status, bl_reason))
 
     # ── CHECK 2: Burst Dispersion (Aaliyah) ──────────────────────────────────
@@ -62,6 +67,7 @@ def compute_risk_score(wallet_address: str) -> None:
     status = "⚠  FLAGGED" if burst_flagged else "✔  CLEAR"
     if burst_flagged:
         flags += 1
+        flags_list.append("burst dispersion")    # ← NEW
     results.append(("Burst Dispersion  (Aaliyah)", status, burst_reason))
 
     # ── CHECK 3: Wallet Age (Om) ─────────────────────────────────────────────
@@ -73,34 +79,3 @@ def compute_risk_score(wallet_address: str) -> None:
         else f"Wallet is {age_result['wallet_age_days']} day(s) old — acceptable."
     )
     status = "⚠  FLAGGED" if age_flagged else "✔  CLEAR"
-    if age_flagged:
-        flags += 1
-    results.append(("Wallet Age Check    (Om)", status, age_reason))
-
-    # ── Print individual check results ───────────────────────────────────────
-    for check_name, check_status, check_reason in results:
-        print(f"\n  {check_name}")
-        print(f"  Status  : {check_status}")
-        print(f"  Detail  : {check_reason}")
-
-    # ── Risk score ───────────────────────────────────────────────────────────
-    risk_map = {
-        0: ("CLEAN",       "✅", "No suspicious activity detected."),
-        1: ("LOW RISK",    "🟡", "One flag raised — monitor this wallet."),
-        2: ("MEDIUM RISK", "🟠", "Two flags raised — likely suspicious activity."),
-        3: ("HIGH RISK",   "🔴", "All three flags raised — HIGH probability of fraud!"),
-    }
-
-    label, icon, advice = risk_map[flags]
-
-    print("\n" + "=" * 60)
-    print(f"  RISK SCORE  :  {flags} / 3 flag(s)")
-    print(f"  VERDICT     :  {icon}  {label}")
-    print(f"  ADVICE      :  {advice}")
-    print("=" * 60 + "\n")
-
-
-# ── Entry point ──────────────────────────────────────────────────────────────
-if __name__ == "__main__":
-    address = "0xD3FEEd5DA83D8e8c449d6CB96ff1eb06ED1cF6C7"
-    compute_risk_score(address)

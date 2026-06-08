@@ -37,5 +37,10 @@ def analyze_wallet(wallet_address: str) -> dict:
         "is_fresh_wallet": age_info.get("is_fresh"),
         "first_tx_date": age_info.get("first_tx_date"),
         "df": df
-    }clear
-    
+    }
+
+def print_result(result: dict, flags: list, risk: str):
+    address = result["wallet"]
+    short = address[:6] + "..." + address[-4:]
+    flag_str = ", ".join(flags) if flags else "none"
+    print(f"Address: {short} | Risk: {risk} | Flags: {flag_str}")
