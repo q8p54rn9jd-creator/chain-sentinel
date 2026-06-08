@@ -6,8 +6,25 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from fetch_transcation import fetch_transactions
 from clean_data import clean_transactions
+from blacklist import BLACKLIST
 
-def build_graph(df):
+def get_node_colors(G, investigated_wallet, blacklist):
+    colors = []
+
+    investigated_wallet = investigated_wallet.lower()
+    blacklist_lower = [addr.lower() for addr in blacklist]
+
+    for node in G.nodes():
+        node_lower = node.lower()
+
+        if node_lower == investigated_wallet:
+            colors.append("blue")
+        elif node_lower in blacklist_lower:
+            colors.append("red")
+        else:
+            colors.append("grey")
+
+    return colors    
     G = nx.DiGraph()  # directed graph
 
     for _, row in df.iterrows():
@@ -32,7 +49,7 @@ def draw_graph(G, address):
 
     # Layout
     pos = nx.spring_layout(G, seed=42)
-
+    node_colors = get_node_colors(G, address, BLACKLIST)
     # All nodes grey by default
     node_colors = ["red" if node == address.lower() else "lightgrey" for node in G.nodes()]
 
