@@ -1,44 +1,29 @@
-import requests
-import pandas as pd
-from datetime import datetime
+# pipeline.py — Om's Phase 3 contribution
+# End-to-end test: Drift exploiter → risk score → graph
 
-API_KEY = "XW8KDJR8MR9JAJJWAI765PWZF698UDI9JR"
+import os
+import networkx as nx
+from Risk_score import compute_risk_score
+from build_graph import draw_graph
+from fetch_transcation import fetch_transactions
+from clean_data import clean_transactions
+from blacklist import BLACKLIST
 
-def fetch_transactions(wallet_address):
-    url = "https://api.etherscan.io/v2/api"
-    params = {
-        "chainid":1,
-        "module": "account",
-        "action": "txlist",
-        "address": wallet_address,
-        "startblock": 0,
-        "endblock": 99999999,
-        "sort": "asc",
-        "apikey": API_KEY,
-    }
-    response = requests.get(url, params=params)
-    data = response.json()
-
-    if data["status"] != "1":
-        print(f"Error: {data['message']}")
-        return pd.DataFrame(columns=["from", "to", "amount_eth", "date"])
-
-    rows = []
-    for tx in data["result"]:
-        rows.append({
-            "from": tx["from"],
-            "to": tx["to"],
-            "amount_eth": int(tx["value"]) / 10**18,
-            "date": datetime.fromtimestamp(int(tx["timeStamp"])).strftime("%Y-%m-%d %H:%M"),
-        })
-    return pd.DataFrame(rows)
+DRIFT_EXPLOITER = "0xD3FEEd5DA83D8e8c449d6CB96ff1eb06ED1cF6C7"
 
 if __name__ == "__main__":
-    address = "0xD3FEEd5DA83D8e8c449d6CB96ff1eb06ED1cF6C7"
-    print(f"Fetching transactions for: {address}\n")
-    df = fetch_transactions(address)
-    if df.empty:
-        print("No transactions found.")
-    else:
-        print(f"Found {len(df)} transactions:\n")
-        print(df.to_string(index=False))
+    # Step 1: Print risk score
+    compute_risk_score(DRIFT_EXPLOITER)
+
+    # Step 2: Build graph manually and draw
+    df = fetch_transactions(DRIFT_EXPLOITER)
+    df = clean_transactions(df)
+
+    G = nx.DiGraph()
+    for _, row in df.iterrows():
+        G.add_edge(row["from"], row["to"], weight=row["amount_eth"])
+
+    draw_graph(G, DRIFT_EXPLOITER)
+
+    # Step 3: Open the graph image
+    os.startfile(os.path.abspath("graph.png"))

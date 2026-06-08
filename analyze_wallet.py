@@ -37,4 +37,5 @@ def analyze_wallet(wallet_address: str) -> dict:
         "is_fresh_wallet": age_info.get("is_fresh"),
         "first_tx_date": age_info.get("first_tx_date"),
         "df": df
-    }
+    }clear
+    
