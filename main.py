@@ -6,9 +6,6 @@ Written by: Benedicta
 
 from fetch_transcation import fetch_transactions
 from clean_data import clean_transactions
-from blacklist import BLACKLIST
-from check_burst import check_burst_dispersion
-from wallet_age_check import check_wallet_age
 from Risk_score import compute_risk_score
 from analyze_wallet import analyze_wallet
 
@@ -31,55 +28,24 @@ def main():
         print("        Addresses start with 0x and are 42 characters long.")
         return
 
-    print(f"\n[1/4] Fetching transactions for {shorten_address(wallet_address)} ...")
+    print(f"\n[1/3] Fetching transactions for {shorten_address(wallet_address)} ...")
 
-    # --- Step 2: Fetch raw transactions ---
+    # --- Step 2: Fetch and clean transactions ---
     raw_transactions = fetch_transactions(wallet_address)
 
-    # fetch_transactions returns a DataFrame — check with .empty
     if raw_transactions is None or raw_transactions.empty:
         print("[ERROR] No transactions found, or the API request failed.")
         print("        Check your ETHERSCAN_API_KEY and internet connection.")
         return
 
-    # --- Step 3: Clean the data (Wei → ETH, Unix → readable dates) ---
-    print(f"[2/4] Cleaning {len(raw_transactions)} transactions ...")
-    transactions = clean_transactions(raw_transactions)
+    print(f"[2/3] Cleaning {len(raw_transactions)} transactions ...")
+    clean_transactions(raw_transactions)
 
-    # --- Step 4: Run the 3 fraud checks ---
-    print("[3/4] Running fraud detection checks ...")
+    # --- Step 3: Run fraud checks + risk score (handled by Risk_score.py) ---
+    print("[3/3] Running fraud detection checks ...\n")
+    compute_risk_score(wallet_address)
 
-    blacklist_flag = any(
-        tx["from"].lower() in [b.lower() for b in BLACKLIST] or
-        tx["to"].lower()   in [b.lower() for b in BLACKLIST]
-        for tx in transactions
-    )
-
-    burst_flag = check_burst_dispersion(transactions)
-    fresh_flag = check_wallet_age(transactions)
-
-    flags = []
-    if blacklist_flag:
-        flags.append("blacklist contact")
-    if burst_flag:
-        flags.append("burst dispersion")
-    if fresh_flag:
-        flags.append("fresh wallet")
-
-    # --- Step 5: Calculate and print risk score ---
-    risk_label = compute_risk_score(flags)
-
-    short = shorten_address(wallet_address)
-    flag_str = ", ".join(flags) if flags else "none"
-
-    print("\n" + "=" * 55)
-    print(f"  Address : {short}")
-    print(f"  Risk    : {risk_label}")
-    print(f"  Flags   : {flag_str}")
-    print("=" * 55)
-
-    # --- Step 6: Full wallet analysis (blacklist + age + graph) ---
-    print("\n[4/4] Running full wallet analysis ...")
+    # --- Step 4: Full wallet analysis and graph ---
     analyze_wallet(wallet_address)
 
     print("\nAnalysis complete.")
