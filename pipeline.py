@@ -2,12 +2,12 @@ import requests
 import pandas as pd
 from datetime import datetime
 
-API_KEY = "XW8KDJR8MR9JAJJWAI765PWZF698UDI9JR"   # Replace with your actual key if needed
+API_KEY = "XW8KDJR8MR9JAJJWAI765PWZF698UDI9JR"
 
 def fetch_transactions(wallet_address):
     url = "https://api.etherscan.io/v2/api"
     params = {
-        "chainid": 1,
+        "chainid":1,
         "module": "account",
         "action": "txlist",
         "address": wallet_address,

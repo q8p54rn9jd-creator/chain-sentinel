@@ -1,45 +1,40 @@
+from fetch_transcation import fetch_transactions
 from blacklist import is_blacklisted, get_label
 from wallet_age_check import check_wallet_age
 
-def analyze_wallet(wallet_address):
-    flags = []
+def analyze_wallet(wallet_address: str) -> dict:
+    print(f"  Fetching transactions...")
+    df = fetch_transactions(wallet_address)
 
-    print(f"\n Analyzing wallet: {wallet_address}\n")
+    if df.empty:
+        return {"error": "No transactions found."}
 
-    # Phase 1: Blacklist check
-    if is_blacklisted(wallet_address):
-        label = get_label(wallet_address)
-        reason = f" Address is blacklisted: {label}"
-        flags.append(reason)
-        print(f" Blacklist : {reason}")
-    else:
-        print(" Blacklist : Clean")
+    total_txs = len(df)
+    unique_counterparties = set(df["to"].tolist() + df["from"].tolist())
+    unique_counterparties.discard(wallet_address.lower())
 
-    # Phase 2: Fresh wallet check
-    age_result = check_wallet_age(wallet_address)
-    if age_result["is_fresh"]:
-        flags.append(age_result["flag_reason"])
-        print(f" Wallet Age: {age_result['flag_reason']}")
-    else:
-        print(f" Wallet Age: {age_result['wallet_age_days']} days old — OK")
+    blacklisted_contacts = []
+    for addr in unique_counterparties:
+        if is_blacklisted(addr):
+            blacklisted_contacts.append({
+                "address": addr,
+                "label": get_label(addr)
+            })
 
-    # Final verdict
-    print("\n" + "="*50)
-    if flags:
-        print(f" SUSPICIOUS WALLET — {len(flags)} flag(s) found")
-        for i, flag in enumerate(flags, 1):
-            print(f"   {i}. {flag}")
-    else:
-        print(" WALLET LOOKS CLEAN — No flags found")
-    print("="*50)
+    total_eth_sent = df[df["from"].str.lower() == wallet_address.lower()]["amount_eth"].sum()
+    total_eth_received = df[df["to"].str.lower() == wallet_address.lower()]["amount_eth"].sum()
+
+    age_info = check_wallet_age(wallet_address)
 
     return {
         "wallet": wallet_address,
-        "flags": flags,
-        "is_suspicious": len(flags) > 0
+        "total_transactions": total_txs,
+        "total_eth_sent": round(total_eth_sent, 4),
+        "total_eth_received": round(total_eth_received, 4),
+        "blacklisted_contacts": blacklisted_contacts,
+        "blacklisted_contact_count": len(blacklisted_contacts),
+        "wallet_age_days": age_info.get("wallet_age_days"),
+        "is_fresh_wallet": age_info.get("is_fresh"),
+        "first_tx_date": age_info.get("first_tx_date"),
+        "df": df
     }
-
-
-if __name__ == "__main__":
-    address = "0xD3FEEd5DA83D8e8c449d6CB96ff1eb06ED1cF6C7"
-    analyze_wallet(address)
