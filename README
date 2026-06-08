@@ -1,4 +1,4 @@
-# ChainSentinel 🔍
+# ChainSentinel 
 ### On-Chain Fraud Detection Tool
 
 A blockchain forensics tool that analyzes Ethereum wallet behavior and identifies suspicious fund movement patterns. Built as a group project using real on-chain data.
@@ -9,18 +9,18 @@ A blockchain forensics tool that analyzes Ethereum wallet behavior and identifie
 
 Enter any Ethereum wallet address and ChainSentinel will:
 
-1. **Check if the wallet is blacklisted** — cross-references against Tornado Cash contracts, OFAC sanctions list, and known hacker wallets from rekt.news
-2. **Detect burst dispersion** — flags wallets that send funds to 5+ different wallets within one hour (classic post-hack pattern)
-3. **Check wallet age** — flags wallets that are less than 7 days old but already moving large amounts
-4. **Visualize the money trail** — draws a directed graph showing every wallet and transaction connected to the address
+1. Check if the wallet is blacklisted — cross-references against Tornado Cash contracts, OFAC sanctions list, and known hacker wallets from rekt.news
+2. Detect burst dispersion — flags wallets that send funds to 5+ different wallets within one hour (classic post-hack pattern)
+3. Check wallet age — flags wallets that are less than 7 days old but already moving large amounts
+4. Visualize the money trail — draws a directed graph showing every wallet and transaction connected to the address
 
 ---
 
 ## Case Study
 
-We ran this tool on the **Drift Protocol exploiter** — the wallet responsible for the largest DeFi hack of 2026.
+We ran this tool on the Drift Protocol exploiter — the wallet responsible for the largest DeFi hack of 2026.
 
-- **$285 million** stolen in 128 seconds on April 1st 2026
+- $285 million stolen in 128 seconds on April 1st 2026
 - Carried out by North Korean state hackers (Lazarus Group)
 - Entire operation funded with just 10 ETH from Tornado Cash
 - Attacker address: `0xD3FEEd5DA83D8e8c449d6CB96ff1eb06ED1cF6C7`
@@ -50,24 +50,24 @@ chain-sentinel/
 
 ## Setup
 
-**1. Clone the repo**
+1. Clone the repo
 ```
 git clone https://github.com/your-team/chain-sentinel
 cd chain-sentinel
 ```
 
-**2. Create and activate virtual environment**
+2. Create and activate virtual environment
 ```
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-**3. Install dependencies**
+3. Install dependencies
 ```
 pip install requests pandas networkx matplotlib python-dotenv
 ```
 
-**4. Add your API key**
+4. Add your API key
 
 Create a `.env` file in the root folder:
 ```
@@ -79,22 +79,22 @@ Get a free key at: https://etherscan.io/apis
 
 ## How to run
 
-**Run the full analysis on any wallet:**
+Run the full analysis on any wallet:
 ```
 python analyze_wallet.py
 ```
 
-**Test Phase 1 (fetch + blacklist check):**
+Test Phase 1 (fetch + blacklist check):
 ```
 python test.py
 ```
 
-**Check burst dispersion only:**
+Check burst dispersion only:
 ```
 python check_burst.py
 ```
 
-**Build the transaction graph:**
+Build the transaction graph:
 ```
 python build_graph.py
 ```
