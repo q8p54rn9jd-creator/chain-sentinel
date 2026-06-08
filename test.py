@@ -43,7 +43,8 @@ flag, reason = check_blacklist_connection(address, clean_df)
 
 print("\n--- Phase 2: Blacklist Check ---")
 print(f"Blacklist flag: {flag}")
-print(f"Reason: {reason}")print(f"Clean rows after filtering: {len(clean_df)}")
+print(f"Reason: {reason}")
+print(f"Clean rows after filtering: {len(clean_df)}")
 
 # Step 4 — print the table
 print("\n--- Transaction Table ---\n")
