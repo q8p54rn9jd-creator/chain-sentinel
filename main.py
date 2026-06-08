@@ -8,6 +8,7 @@ from fetch_transcation import fetch_transactions
 from clean_data import clean_transactions
 from Risk_score import compute_risk_score
 from analyze_wallet import analyze_wallet
+from graph import draw_transaction_graph
 
 
 def shorten_address(address):
@@ -47,6 +48,9 @@ def main():
 
     # --- Step 4: Full wallet analysis and graph ---
     analyze_wallet(wallet_address)
+
+    # --- Step 5: Draw and save transaction graph ---
+    draw_transaction_graph(wallet_address, output_file="graph.png")
 
     print("\nAnalysis complete.")
 
