@@ -1,1 +1,134 @@
-My job was to test everything worked. I ran the script on the actual Drift Protocol hacker wallet — it instantly flagged it as blacklisted, pulled 43 real transactions from the blockchain, and the big ones at the top — 3324 ETH, 1574 ETH , that's the actual stolen money landing in the wallet on April 1st. Amounts in ETH, dates readable, no errors. 
+# ChainSentinel 
+### On-Chain Fraud Detection Tool
+
+A blockchain forensics tool that analyzes Ethereum wallet behavior and identifies suspicious fund movement patterns. Built as a group project using real on-chain data.
+
+---
+
+## What it does
+
+Enter any Ethereum wallet address and ChainSentinel will:
+
+1. Check if the wallet is blacklisted — cross-references against Tornado Cash contracts, OFAC sanctions list, and known hacker wallets from rekt.news
+2. Detect burst dispersion — flags wallets that send funds to 5+ different wallets within one hour (classic post-hack pattern)
+3. Check wallet age — flags wallets that are less than 7 days old but already moving large amounts
+4. Visualize the money trail — draws a directed graph showing every wallet and transaction connected to the address
+
+---
+
+## Case Study
+
+We ran this tool on the Drift Protocol exploiter — the wallet responsible for the largest DeFi hack of 2026.
+
+- $285 million stolen in 128 seconds on April 1st 2026
+- Carried out by North Korean state hackers (Lazarus Group)
+- Entire operation funded with just 10 ETH from Tornado Cash
+- Attacker address: `0xD3FEEd5DA83D8e8c449d6CB96ff1eb06ED1cF6C7`
+
+Our tool instantly flagged the address as blacklisted and visualized 28 connected wallets and 27 transactions showing the consolidation of stolen funds.
+
+---
+
+## File Structure
+
+```
+chain-sentinel/
+├── blacklist.py          # Benedicta — Tornado Cash + hacker wallet reference lists
+├── fetch_transcation.py  # OM        — Etherscan API wrapper, pulls transaction data
+├── clean_data.py         # Tan       — normalizes and cleans raw transaction data
+├── check_burst.py        # Aaliyah   — burst dispersion detection
+├── wallet_age_check.py   # OM        — checks how old a wallet is
+├── build_graph.py        # Aaliyah   — builds and visualizes the transaction graph
+├── analyze_wallet.py     # Team      — combines all checks into one analysis
+├── test.py               # Aaliyah   — Phase 1 test script
+├── requirements.txt      # all dependencies
+├── .env.example          # template for API key setup
+└── README.md
+```
+
+---
+
+## Setup
+
+1. Clone the repo
+```
+git clone https://github.com/q8p54rn9jd-creator/chain-sentinel.git
+cd chain-sentinel
+```
+
+2. Create and activate virtual environment
+```
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+```
+
+3. Install dependencies
+```
+pip install requests pandas networkx matplotlib python-dotenv
+```
+
+4. Add your API key
+
+Create a `.env` file in the root folder:
+```
+ETHERSCAN_API_KEY=YourKeyHere
+```
+Get a free key at: https://etherscan.io/apis
+
+---
+
+## How to run
+
+Run the full analysis on any wallet:
+```
+python analyze_wallet.py
+```
+
+Test Phase 1 (fetch + blacklist check):
+```
+python test.py
+```
+
+Check burst dispersion only:
+```
+python check_burst.py
+```
+
+Build the transaction graph:
+```
+python build_graph.py
+```
+
+---
+
+## Tech Stack
+
+| Tool | Purpose |
+|---|---|
+| Python | Core language |
+| Etherscan API | Fetch live blockchain data |
+| pandas | Clean and process transaction data |
+| NetworkX | Build transaction graph |
+| Matplotlib | Visualize the graph |
+| python-dotenv | Manage API key securely |
+
+---
+
+## Team
+
+| Name | Role |
+|---|---|
+| OM | Etherscan API wrapper, wallet age check |
+| Benedicta | Blacklist research and compilation |
+| Tan | Data cleaning and normalization |
+| Aaliyah | Testing, burst dispersion check, graph visualization |
+
+---
+
+## Sources
+
+- [rekt.news — Drift Protocol hack](https://rekt.news)
+- [Arkham Intelligence — Drift Exploiter entity](https://arkhamintelligence.com)
+- [Etherscan — exploiter address](https://etherscan.io/address/0xD3FEEd5DA83D8e8c449d6CB96ff1eb06ED1cF6C7)
+- [OFAC SDN sanctions list](https://ofac.treasury.gov)
+- [Tornado Cash contract addresses](https://etherscan.io)
