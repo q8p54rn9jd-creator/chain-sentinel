@@ -1,13 +1,8 @@
 # main.py
 
-from data_fetcher import get_transactions
-from fraud_checks import (
-    check_blacklist,
-    check_burst_dispersion,
-    check_fresh_wallet,
-    calculate_risk_score
-)
-from visualizer import build_graph
+from fetch_transcation import fetch_transactions as get_transactions
+from Risk_score import compute_risk_score
+from build_graph import draw_graph as build_graph
 
 
 def main():
@@ -31,33 +26,15 @@ def main():
     burst_flag = check_burst_dispersion(transactions)
     fresh_wallet_flag = check_fresh_wallet(transactions)
 
-    flags = []
+    risk, flags = compute_risk_score(wallet)
 
-    if blacklist_flag:
-        flags.append("blacklist contact")
-
-    if burst_flag:
-        flags.append("burst dispersion")
-
-    if fresh_wallet_flag:
-        flags.append("fresh wallet")
-
-    risk = calculate_risk_score(
-        blacklist_flag,
-        burst_flag,
-        fresh_wallet_flag
-    )
-
+    # ── Clean one-line output ────────────────────────────────────────────────
     print("\n" + "=" * 50)
-    print(f"Address: {wallet}")
-    print(f"Risk Level: {risk}")
-
-    if flags:
-        print(f"Flags Triggered: {', '.join(flags)}")
-    else:
-        print("Flags Triggered: None")
-
+    short = wallet[:6] + "..." + wallet[-4:]
+    flag_str = ", ".join(flags) if flags else "none"
+    print(f"Address: {short} | Risk: {risk} | Flags: {flag_str}")
     print("=" * 50)
+    # ────────────────────────────────────────────────────────────────────────
 
     print("\nGenerating transaction graph...")
     build_graph(wallet, transactions)
