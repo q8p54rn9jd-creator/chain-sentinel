@@ -9,8 +9,8 @@ from clean_data import clean_transactions
 from blacklist import BLACKLIST
 from check_burst import check_burst_dispersion
 from wallet_age_check import check_wallet_age
-from Risk_score import calculate_risk_score
-from analyze_wallet import build_and_show_graph
+from Risk_score import compute_risk_score
+from analyze_wallet import analyze_wallet
 
 
 def shorten_address(address):
@@ -48,14 +48,14 @@ def main():
     # --- Step 4: Run the 3 fraud checks ---
     print("[3/4] Running fraud detection checks ...")
 
-    blacklist_flag   = any(
+    blacklist_flag = any(
         tx["from"].lower() in [b.lower() for b in BLACKLIST] or
         tx["to"].lower()   in [b.lower() for b in BLACKLIST]
         for tx in transactions
     )
 
-    burst_flag      = check_burst_dispersion(transactions)
-    fresh_flag      = check_wallet_age(transactions)
+    burst_flag = check_burst_dispersion(transactions)
+    fresh_flag = check_wallet_age(transactions)
 
     flags = []
     if blacklist_flag:
@@ -66,7 +66,7 @@ def main():
         flags.append("fresh wallet")
 
     # --- Step 5: Calculate and print risk score ---
-    risk_label = calculate_risk_score(flags)
+    risk_label = compute_risk_score(flags)
 
     short = shorten_address(wallet_address)
     flag_str = ", ".join(flags) if flags else "none"
@@ -77,11 +77,10 @@ def main():
     print(f"  Flags   : {flag_str}")
     print("=" * 55)
 
-    # --- Step 6: Build and display the transaction graph ---
-    print("\n[4/4] Building transaction graph ...")
-    build_and_show_graph(transactions, wallet_address, BLACKLIST)
+    # --- Step 6: Full wallet analysis (blacklist + age + graph) ---
+    print("\n[4/4] Running full wallet analysis ...")
+    analyze_wallet(wallet_address)
 
-    print("\nGraph saved as graph.png")
     print("\nAnalysis complete.")
 
 
