@@ -120,7 +120,7 @@ python build_graph.py
 |---|---|
 | OM | Etherscan API wrapper, wallet age check |
 | Benedicta | Blacklist research and compilation |
-| Tan | Data cleaning and normalization |
+| Tanushka | Data cleaning and normalization |
 | Aaliyah | Testing, burst dispersion check, graph visualization |
 
 ---
